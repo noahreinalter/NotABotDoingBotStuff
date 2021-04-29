@@ -17,7 +17,7 @@ handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w'
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
 
-bot = commands.Bot(command_prefix='$')
+bot = commands.Bot(command_prefix=commands.when_mentioned_or('$'))
 
 
 @bot.event
@@ -45,6 +45,8 @@ async def generation_controller_error(ctx, error):
         await ctx.send('This command only works on a server.')
     elif isinstance(error, commands.CheckFailure):
         await ctx.send('Only User with the role Admin use this command.')
+    else:
+        await ctx.send('Something went wrong pleas try again.')
 
 
 async def generate_roles(guild, role_name, member):
@@ -70,6 +72,7 @@ async def generate_channels(guild, channel_name, roles):
         guild.default_role: discord.PermissionOverwrite(read_messages=False),
         roles[0]: discord.PermissionOverwrite(read_messages=True),
         roles[1]: discord.PermissionOverwrite(read_messages=True),
+        discord.utils.get(guild.roles, name=bot.user.name): discord.PermissionOverwrite(read_messages=True)
     }
     category = await guild.create_category(name=channel_name, overwrites=overwrites)
 
@@ -95,6 +98,8 @@ async def delete_controller_error(ctx, error):
         await ctx.send('This command only works on a server.')
     elif isinstance(error, commands.CheckFailure):
         await ctx.send('Only User with the role Admin use this command.')
+    else:
+        await ctx.send('Something went wrong pleas try again.')
 
 
 async def delete_roles(guild, role_name):
@@ -120,7 +125,7 @@ async def add_member_to_role(ctx, member: commands.MemberConverter, role: comman
     if discord.utils.get(ctx.author.roles, name=leader_role) is None:
         raise commands.MissingRole(leader_role)
 
-    await member.add_roles(role.name.split()[0] + member_string)
+    await member.add_roles(discord.utils.get(ctx.guild.roles, name=role.name.split()[0] + member_string))
     await ctx.send('Role added to user.')
 
 
@@ -130,6 +135,8 @@ async def add_member_to_role_error(ctx, error):
         await ctx.send('This command only works on a server.')
     elif isinstance(error, commands.MissingRole):
         await ctx.send('To add this role you need to have the role ' + error.missing_role + '.')
+    else:
+        await ctx.send('Something went wrong pleas try again.')
 
 
 @bot.command(name='remove', help='$remove @User @Role')
@@ -139,7 +146,7 @@ async def remove_member_from_role(ctx, member: commands.MemberConverter, role: c
     if discord.utils.get(ctx.author.roles, name=leader_role) is None:
         raise commands.MissingRole(leader_role)
 
-    await member.remove_roles(role.name.split()[0] + member_string)
+    await member.remove_roles(discord.utils.get(ctx.guild.roles, name=role.name.split()[0] + member_string))
     await ctx.send('Role removed from user.')
 
 
@@ -149,6 +156,27 @@ async def remove_member_from_role_error(ctx, error):
         await ctx.send('This command only works on a server.')
     elif isinstance(error, commands.MissingRole):
         await ctx.send('To remove this role you need to have the role ' + error.missing_role + '.')
+    else:
+        await ctx.send('Something went wrong pleas try again.')
+
+
+@bot.command(name='invite', help='Returns a invite link for the bot.')
+async def generate_invite_link(ctx):
+    await ctx.send(discord.utils.oauth_url(
+        client_id=bot.user.id,
+        permissions=discord.Permissions(manage_channels=True, manage_roles=True,
+                                        read_messages=True, send_messages=True)))
+
+
+@bot.command(name='stop', hidden=True)
+@commands.is_owner()
+async def stop_bot(ctx):
+    await bot.close()
+
+
+@stop_bot.error
+async def stop_bot_error(ctx, error):
+    pass
 
 
 if __name__ == '__main__':
