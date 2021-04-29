@@ -8,6 +8,8 @@ import asyncio
 load_dotenv()
 
 BOT_TOKEN = os.getenv('BOT_TOKEN')
+leader_string = ' Leader'
+member_string = ' Member'
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
@@ -47,13 +49,13 @@ async def generation_controller_error(ctx, error):
 
 async def generate_roles(guild, role_name, member):
     await asyncio.gather(
-        guild.create_role(name=role_name + ' Leader'),
-        guild.create_role(name=role_name + ' Member')
+        guild.create_role(name=role_name + leader_string),
+        guild.create_role(name=role_name + member_string)
     )
 
     all_roles = await guild.fetch_roles()
-    roles = [discord.utils.get(all_roles, name=role_name + ' Leader'),
-             discord.utils.get(all_roles, name=role_name + ' Member')]
+    roles = [discord.utils.get(all_roles, name=role_name + leader_string),
+             discord.utils.get(all_roles, name=role_name + member_string)]
 
     await asyncio.gather(
         member.add_roles(roles[0]),
@@ -97,8 +99,8 @@ async def delete_controller_error(ctx, error):
 
 async def delete_roles(guild, role_name):
     await asyncio.gather(
-        discord.utils.get(guild.roles, name=role_name + ' Leader').delete(),
-        discord.utils.get(guild.roles, name=role_name + ' Member').delete()
+        discord.utils.get(guild.roles, name=role_name + leader_string).delete(),
+        discord.utils.get(guild.roles, name=role_name + member_string).delete()
     )
 
 
@@ -114,35 +116,39 @@ async def delete_channels(guild, role_name):
 @bot.command(name='add', help='$add @User @Role')
 @commands.guild_only()
 async def add_member_to_role(ctx, member: commands.MemberConverter, role: commands.RoleConverter):
-    leader_role = role.name.split()[0] + ' Leader'
-    if discord.utils.get(ctx.author.roles, name=leader_role):
-        await member.add_roles(role)
-        await ctx.send('Role added to user.')
-    else:
-        await ctx.send('To add this role you need to have the role ' + leader_role + '.')
+    leader_role = role.name.split()[0] + leader_string
+    if discord.utils.get(ctx.author.roles, name=leader_role) is None:
+        raise commands.MissingRole(leader_role)
+
+    await member.add_roles(role.name.split()[0] + member_string)
+    await ctx.send('Role added to user.')
 
 
 @add_member_to_role.error
 async def add_member_to_role_error(ctx, error):
     if isinstance(error, commands.NoPrivateMessage):
         await ctx.send('This command only works on a server.')
+    elif isinstance(error, commands.MissingRole):
+        await ctx.send('To add this role you need to have the role ' + error.missing_role + '.')
 
 
 @bot.command(name='remove', help='$remove @User @Role')
 @commands.guild_only()
 async def remove_member_from_role(ctx, member: commands.MemberConverter, role: commands.RoleConverter):
-    leader_role = role.name.split()[0] + ' Leader'
-    if discord.utils.get(ctx.author.roles, name=leader_role):
-        await member.remove_roles(role)
-        await ctx.send('Role removed from user.')
-    else:
-        await ctx.send('To remove this role you need to have the role ' + leader_role + '.')
+    leader_role = role.name.split()[0] + leader_string
+    if discord.utils.get(ctx.author.roles, name=leader_role) is None:
+        raise commands.MissingRole(leader_role)
+
+    await member.remove_roles(role.name.split()[0] + member_string)
+    await ctx.send('Role removed from user.')
 
 
 @remove_member_from_role.error
 async def remove_member_from_role_error(ctx, error):
     if isinstance(error, commands.NoPrivateMessage):
         await ctx.send('This command only works on a server.')
+    elif isinstance(error, commands.MissingRole):
+        await ctx.send('To remove this role you need to have the role ' + error.missing_role + '.')
 
 
 if __name__ == '__main__':
