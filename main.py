@@ -24,16 +24,25 @@ async def on_ready():
 
 
 @bot.command(name='generate', help='$generate categoryname @User')
-async def generation_controller(ctx):
-    if discord.utils.get(ctx.author.roles, name='Admin') is None:
+@commands.has_role('Admin')
+@commands.guild_only()
+async def generation_controller(ctx, category_name, member: commands.MemberConverter):
+    if discord.utils.get(ctx.guild.channels, name=category_name) is None:
+        roles = await generate_roles(ctx.guild, category_name, member)
+
+        await generate_channels(ctx.guild, category_name, roles)
+
+        await ctx.send('New roles and channels generated.')
+    else:
+        await ctx.send('There are already channels in this namespace.')
+
+
+@generation_controller.error
+async def generation_controller_error(ctx, error):
+    if isinstance(error, commands.NoPrivateMessage):
+        await ctx.send('This command only works on a server.')
+    elif isinstance(error, commands.CheckFailure):
         await ctx.send('Only User with the role Admin use this command.')
-        return
-    role_name = ctx.message.content.split()[1]
-    roles = await generate_roles(ctx.guild, role_name, ctx.message.mentions[0])
-
-    await generate_channels(ctx.guild, role_name, roles)
-
-    await ctx.send('New roles and channels generated.')
 
 
 async def generate_roles(guild, role_name, member):
@@ -69,16 +78,21 @@ async def generate_channels(guild, channel_name, roles):
 
 
 @bot.command(name='delete', help='$delete categoryname')
-async def delete_controller(ctx):
-    if discord.utils.get(ctx.author.roles, name='Admin') is None:
-        await ctx.send('Only User with the role Admin use this command.')
-        return
-    role_name = ctx.message.content.split()[1]
-    await delete_roles(ctx.guild, role_name)
-
-    await delete_channels(ctx.guild, role_name)
+@commands.has_role('Admin')
+@commands.guild_only()
+async def delete_controller(ctx, category_name):
+    await delete_roles(ctx.guild, category_name)
+    await delete_channels(ctx.guild, category_name)
 
     await ctx.send('Roles and channels have been deleted.')
+
+
+@delete_controller.error
+async def delete_controller_error(ctx, error):
+    if isinstance(error, commands.NoPrivateMessage):
+        await ctx.send('This command only works on a server.')
+    elif isinstance(error, commands.CheckFailure):
+        await ctx.send('Only User with the role Admin use this command.')
 
 
 async def delete_roles(guild, role_name):
@@ -98,23 +112,37 @@ async def delete_channels(guild, role_name):
 
 
 @bot.command(name='add', help='$add @User @Role')
-async def add_member_to_role(ctx):
-    leader_role = ctx.message.role_mentions[0].name.split()[0] + ' Leader'
+@commands.guild_only()
+async def add_member_to_role(ctx, member: commands.MemberConverter, role: commands.RoleConverter):
+    leader_role = role.name.split()[0] + ' Leader'
     if discord.utils.get(ctx.author.roles, name=leader_role):
-        await ctx.message.mentions[0].add_roles(ctx.message.role_mentions[0])
+        await member.add_roles(role)
         await ctx.send('Role added to user.')
     else:
         await ctx.send('To add this role you need to have the role ' + leader_role + '.')
 
 
+@add_member_to_role.error
+async def add_member_to_role_error(ctx, error):
+    if isinstance(error, commands.NoPrivateMessage):
+        await ctx.send('This command only works on a server.')
+
+
 @bot.command(name='remove', help='$remove @User @Role')
-async def remove_member_from_role(ctx):
-    leader_role = ctx.message.role_mentions[0].name.split()[0] + ' Leader'
+@commands.guild_only()
+async def remove_member_from_role(ctx, member: commands.MemberConverter, role: commands.RoleConverter):
+    leader_role = role.name.split()[0] + ' Leader'
     if discord.utils.get(ctx.author.roles, name=leader_role):
-        await ctx.message.mentions[0].remove_roles(ctx.message.role_mentions[0])
+        await member.remove_roles(role)
         await ctx.send('Role removed from user.')
     else:
         await ctx.send('To remove this role you need to have the role ' + leader_role + '.')
+
+
+@remove_member_from_role.error
+async def remove_member_from_role_error(ctx, error):
+    if isinstance(error, commands.NoPrivateMessage):
+        await ctx.send('This command only works on a server.')
 
 
 if __name__ == '__main__':
