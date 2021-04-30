@@ -8,6 +8,7 @@ import asyncio
 load_dotenv()
 
 BOT_TOKEN = os.getenv('BOT_TOKEN')
+prefix = '$'
 leader_string = ' Leader'
 member_string = ' Member'
 
@@ -17,7 +18,7 @@ handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w'
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
 
-bot = commands.Bot(command_prefix=commands.when_mentioned_or('$'))
+bot = commands.Bot(command_prefix=commands.when_mentioned_or(prefix))
 
 
 @bot.event
@@ -27,6 +28,8 @@ async def on_ready():
 
 @bot.command(name='generate', help='$generate categoryname @User')
 @commands.has_role('Admin')
+@commands.bot_has_guild_permissions(manage_channels=True, manage_roles=True,
+                                    read_messages=True, send_messages=True)
 @commands.guild_only()
 async def generation_controller(ctx, category_name, member: commands.MemberConverter):
     if discord.utils.get(ctx.guild.channels, name=category_name) is None:
@@ -43,6 +46,9 @@ async def generation_controller(ctx, category_name, member: commands.MemberConve
 async def generation_controller_error(ctx, error):
     if isinstance(error, commands.NoPrivateMessage):
         await ctx.send('This command only works on a server.')
+    elif isinstance(error, commands.BotMissingPermissions):
+        await ctx.send('The bot needs at least all permissions requested from the invite link generated with '
+                       + prefix + 'invite')
     elif isinstance(error, commands.CheckFailure):
         await ctx.send('Only User with the role Admin use this command.')
     else:
@@ -84,6 +90,8 @@ async def generate_channels(guild, channel_name, roles):
 
 @bot.command(name='delete', help='$delete categoryname')
 @commands.has_role('Admin')
+@commands.bot_has_guild_permissions(manage_channels=True, manage_roles=True,
+                                    read_messages=True, send_messages=True)
 @commands.guild_only()
 async def delete_controller(ctx, category_name):
     await delete_roles(ctx.guild, category_name)
@@ -96,6 +104,9 @@ async def delete_controller(ctx, category_name):
 async def delete_controller_error(ctx, error):
     if isinstance(error, commands.NoPrivateMessage):
         await ctx.send('This command only works on a server.')
+    elif isinstance(error, commands.BotMissingPermissions):
+        await ctx.send('The bot needs at least all permissions requested from the invite link generated with '
+                       + prefix + 'invite')
     elif isinstance(error, commands.CheckFailure):
         await ctx.send('Only User with the role Admin use this command.')
     else:
@@ -119,6 +130,8 @@ async def delete_channels(guild, role_name):
 
 
 @bot.command(name='add', help='$add @User @Role')
+@commands.bot_has_guild_permissions(manage_channels=True, manage_roles=True,
+                                    read_messages=True, send_messages=True)
 @commands.guild_only()
 async def add_member_to_role(ctx, member: commands.MemberConverter, role: commands.RoleConverter):
     leader_role = role.name.split()[0] + leader_string
@@ -133,6 +146,9 @@ async def add_member_to_role(ctx, member: commands.MemberConverter, role: comman
 async def add_member_to_role_error(ctx, error):
     if isinstance(error, commands.NoPrivateMessage):
         await ctx.send('This command only works on a server.')
+    elif isinstance(error, commands.BotMissingPermissions):
+        await ctx.send('The bot needs at least all permissions requested from the invite link generated with '
+                       + prefix + 'invite')
     elif isinstance(error, commands.MissingRole):
         await ctx.send('To add this role you need to have the role ' + error.missing_role + '.')
     else:
@@ -140,6 +156,8 @@ async def add_member_to_role_error(ctx, error):
 
 
 @bot.command(name='remove', help='$remove @User @Role')
+@commands.bot_has_guild_permissions(manage_channels=True, manage_roles=True,
+                                    read_messages=True, send_messages=True)
 @commands.guild_only()
 async def remove_member_from_role(ctx, member: commands.MemberConverter, role: commands.RoleConverter):
     leader_role = role.name.split()[0] + leader_string
@@ -154,6 +172,9 @@ async def remove_member_from_role(ctx, member: commands.MemberConverter, role: c
 async def remove_member_from_role_error(ctx, error):
     if isinstance(error, commands.NoPrivateMessage):
         await ctx.send('This command only works on a server.')
+    elif isinstance(error, commands.BotMissingPermissions):
+        await ctx.send('The bot needs at least all permissions requested from the invite link generated with '
+                       + prefix + 'invite')
     elif isinstance(error, commands.MissingRole):
         await ctx.send('To remove this role you need to have the role ' + error.missing_role + '.')
     else:
