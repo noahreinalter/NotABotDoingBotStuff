@@ -133,3 +133,6 @@ dmypy.json
 
 #logs
 discord.log
+
+#Database
+db.sqlite
