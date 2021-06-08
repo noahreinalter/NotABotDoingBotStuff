@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import asyncio
 
-from main import prefix, leader_string, member_string
+from main import prefix, default_admin_role, leader_string, member_string
 
 
 def setup(bot):
@@ -20,7 +20,7 @@ class CategoryGenerator(commands.Cog, name='Category Generator'):
         self.bot = bot
 
     @commands.command(name='generate', help='$generate categoryname @User')
-    @commands.has_role('Admin')
+    @commands.has_role(default_admin_role)
     @commands.bot_has_guild_permissions(manage_channels=True, manage_roles=True,
                                         read_messages=True, send_messages=True)
     @commands.guild_only()
@@ -40,7 +40,7 @@ class CategoryGenerator(commands.Cog, name='Category Generator'):
             await ctx.send('This command only works on a server.')
         elif isinstance(error, commands.BotMissingPermissions):
             await ctx.send('The bot needs at least all permissions requested from the invite link generated with '
-                           + prefix + 'invite')
+                           + prefix(ctx) + 'invite')
         elif isinstance(error, commands.CheckFailure):
             await ctx.send('Only User with the role Admin use this command.')
         else:
@@ -78,7 +78,7 @@ class CategoryGenerator(commands.Cog, name='Category Generator'):
         )
 
     @commands.command(name='delete', help='$delete categoryname')
-    @commands.has_role('Admin')
+    @commands.has_role(default_admin_role)
     @commands.bot_has_guild_permissions(manage_channels=True, manage_roles=True,
                                         read_messages=True, send_messages=True)
     @commands.guild_only()
@@ -94,7 +94,7 @@ class CategoryGenerator(commands.Cog, name='Category Generator'):
             await ctx.send('This command only works on a server.')
         elif isinstance(error, commands.BotMissingPermissions):
             await ctx.send('The bot needs at least all permissions requested from the invite link generated with '
-                           + prefix + 'invite')
+                           + prefix(ctx) + 'invite')
         elif isinstance(error, commands.CheckFailure):
             await ctx.send('Only User with the role Admin use this command.')
         else:
@@ -132,7 +132,7 @@ class CategoryGenerator(commands.Cog, name='Category Generator'):
             await ctx.send('This command only works on a server.')
         elif isinstance(error, commands.BotMissingPermissions):
             await ctx.send('The bot needs at least all permissions requested from the invite link generated with '
-                           + prefix + 'invite')
+                           + prefix(ctx) + 'invite')
         elif isinstance(error, commands.MissingRole):
             await ctx.send('To add this role you need to have the role ' + error.missing_role + '.')
         else:
@@ -156,7 +156,7 @@ class CategoryGenerator(commands.Cog, name='Category Generator'):
             await ctx.send('This command only works on a server.')
         elif isinstance(error, commands.BotMissingPermissions):
             await ctx.send('The bot needs at least all permissions requested from the invite link generated with '
-                           + prefix + 'invite')
+                           + prefix(ctx) + 'invite')
         elif isinstance(error, commands.MissingRole):
             await ctx.send('To remove this role you need to have the role ' + error.missing_role + '.')
         else:

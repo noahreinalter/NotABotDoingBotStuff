@@ -9,7 +9,8 @@ from sqlite3 import Error
 load_dotenv()
 
 BOT_TOKEN = os.getenv('BOT_TOKEN')
-prefix = '$'
+default_prefix = '$'
+default_admin_role = 'Admin'
 leader_string = ' Leader'
 member_string = ' Member'
 sql_path = 'db.sqlite'
@@ -21,7 +22,34 @@ handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w'
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
 
-bot = commands.Bot(command_prefix=commands.when_mentioned_or(prefix))
+
+def prefix(ctx):
+    cur = sql_connection.cursor()
+    cur.execute("SELECT * FROM servers WHERE id=:id",
+                {"id": ctx.guild.id})
+
+    guild = cur.fetchone()
+
+    if guild is not None:
+        return guild[1]
+    else:
+        return default_prefix
+
+
+def prefix_function(bot, message):
+    cur = sql_connection.cursor()
+    cur.execute("SELECT * FROM servers WHERE id=:id",
+                {"id": message.guild.id})
+
+    guild = cur.fetchone()
+
+    if guild is not None:
+        return commands.when_mentioned_or(guild[1])(bot, message)
+    else:
+        return commands.when_mentioned_or(default_prefix)(bot, message)
+
+
+bot = commands.Bot(command_prefix=prefix_function)
 
 
 @bot.event
@@ -70,6 +98,42 @@ async def remove_extension(ctx, extension_name):
 @remove_extension.error
 async def remove_extension_error(ctx, error):
     pass
+
+
+@bot.command(name='change_prefix')
+@commands.has_role(default_admin_role)
+async def change_prefix(ctx, new_prefix):
+    cur = sql_connection.cursor()
+    cur.execute("SELECT * FROM servers WHERE id=:id",
+                {"id": ctx.guild.id})
+
+    guild = cur.fetchone()
+
+    if guild is not None:
+        cur.execute("REPLACE INTO servers values (?, ?, ?)", (guild[0], new_prefix, guild[2]))
+    else:
+        cur.execute("INSERT INTO servers values (?, ?, ?)", (ctx.guild.id, new_prefix, default_admin_role))
+
+    sql_connection.commit()
+    await ctx.send('Prefix changed to ' + new_prefix)
+
+
+@bot.command(name='change_admin_role', help='Work in progress does not work!!')
+@commands.has_role(default_admin_role)
+async def change_admin_role(ctx, new_role_name):
+    cur = sql_connection.cursor()
+    cur.execute("SELECT * FROM servers WHERE id=:id",
+                {"id": ctx.guild.id})
+
+    guild = cur.fetchone()
+
+    if guild is not None:
+        cur.execute("REPLACE INTO servers values (?, ?, ?)", (guild[0], guild[1], new_role_name))
+    else:
+        cur.execute("INSERT INTO servers values (?, ?, ?)", (ctx.guild.id, prefix(ctx), new_role_name))
+
+    sql_connection.commit()
+    await ctx.send('Admin role changed to ' + new_role_name)
 
 
 def create_connection(path):
