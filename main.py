@@ -118,7 +118,7 @@ async def change_prefix(ctx, new_prefix):
     await ctx.send('Prefix changed to ' + new_prefix)
 
 
-@bot.command(name='change_admin_role', help='Work in progress does not work!!')
+@bot.command(name='change_admin_role', help='Work in progress does not work!!', hidden=True)
 @commands.has_role(default_admin_role)
 async def change_admin_role(ctx, new_role_name):
     cur = sql_connection.cursor()

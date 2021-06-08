@@ -1,18 +1,12 @@
 # NotABotDoingBotStuff
 A Basic Discord Server Management Bot
 
-Commands:
+Useful commands:
 
 $help
 
-$generate categoryname @User
-
-$add @User @Role
-
-$remove @User @Role
-
-$delete categoryname
-
 $invite
+
+$add_extension category_generator
 
 Instead of $ the bot can be mentioned.
