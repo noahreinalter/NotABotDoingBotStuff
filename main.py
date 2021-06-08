@@ -55,6 +55,14 @@ bot = commands.Bot(command_prefix=prefix_function)
 @bot.event
 async def on_ready():
     print('Logged on as {0}!'.format(bot.user))
+    print('Logged in on {0} servers'.format(len(bot.guilds)))
+    for guild in bot.guilds:
+        print(' {0}, Number of members = {1}'.format(guild.name, guild.member_count))
+
+
+@bot.event
+async def on_guild_join(guild):
+    print('Joined', guild)
 
 
 @bot.command(name='invite', help='Returns a invite link for the bot.')
