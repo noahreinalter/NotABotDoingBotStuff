@@ -15,6 +15,7 @@ leader_string = ' Leader'
 member_string = ' Member'
 sql_path = 'db.sqlite'
 sql_connection = None
+extension_feature_path = 'extensions.features.'
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
@@ -84,10 +85,15 @@ async def stop_bot_error(ctx, error):
     pass
 
 
+def add_extension_function(extension_name):
+    bot.load_extension(extension_name)
+
+
 @bot.command(name='add_extension', hidden=True)
 @commands.is_owner()
 async def add_extension(ctx, extension_name):
-    bot.load_extension(extension_name)
+    add_extension_function(extension_feature_path + extension_name)
+
     await ctx.send('Extension ' + extension_name + ' added to bot.')
 
 
@@ -96,10 +102,15 @@ async def add_extension_error(ctx, error):
     pass
 
 
+def remove_extension_function(extension_name):
+    bot.unload_extension(extension_name)
+
+
 @bot.command(name='remove_extension', hidden=True)
 @commands.is_owner()
 async def remove_extension(ctx, extension_name):
-    bot.unload_extension(extension_name)
+    remove_extension_function(extension_feature_path + extension_name)
+
     await ctx.send('Extension ' + extension_name + ' removed from bot.')
 
 
@@ -175,18 +186,7 @@ def create_servers(connection):
                         """)
 
 
-def create_extensions(connection):
-    execute_create_query(connection,
-                         """
-                            CREATE TABLE IF NOT EXISTS extensions (
-                            id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            name TEXT NOT NULL 
-                            );
-                        """)
-
-
 if __name__ == '__main__':
     sql_connection = create_connection(sql_path)
     create_servers(sql_connection)
-    create_extensions(sql_connection)
     bot.run(BOT_TOKEN)
