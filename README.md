@@ -7,6 +7,4 @@ $help
 
 $invite
 
-$add_extension category_generator
-
 Instead of $ the bot can be mentioned.
