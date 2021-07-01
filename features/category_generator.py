@@ -4,17 +4,20 @@ import asyncio
 
 import core.role_manager
 import core.prefix_manager
+import core.permission_manager
 
 leader_string = ' Leader'
 member_string = ' Member'
 
 
 def setup(bot):
+    core.permission_manager.add_permissions(["manage_channels", "manage_roles", "read_messages", "send_messages"])
     bot.add_cog(CategoryGenerator(bot))
     print('CategoryGenerator is being loaded!')
 
 
 def teardown(bot):
+    core.permission_manager.remove_permissions(["manage_channels", "manage_roles", "read_messages", "send_messages"])
     bot.remove_cog('CategoryGenerator')
     print('CategoryGenerator is being unloaded')
 

@@ -1,13 +1,20 @@
 import discord
 from discord.ext import commands
 
+from main import add_extension_function, remove_extension_function
+import core.permission_manager
+
+extension_feature_path = 'features.'
+
 
 def setup(bot):
+    core.permission_manager.add_permissions(["read_messages", "send_messages"])
     bot.add_cog(BotManagement(bot))
     print('BotManagement is being loaded!')
 
 
 def teardown(bot):
+    core.permission_manager.remove_permissions(["read_messages", "send_messages"])
     bot.remove_cog('BotManagement')
     print('BotManagement is being unloaded')
 
@@ -16,12 +23,34 @@ class BotManagement(commands.Cog, name='Bot Management'):
     def __init__(self, bot):
         self.bot = bot
 
+    @commands.command(name='add_extension', help='$add_extension extension_name')
+    @commands.is_owner()
+    async def add_extension(self, ctx, extension_name):
+        add_extension_function(extension_feature_path + extension_name)
+
+        await ctx.send('Extension ' + extension_name + ' added to bot.')
+
+    @add_extension.error
+    async def add_extension_error(self, ctx, error):
+        pass
+
+    @commands.command(name='remove_extension', help='$remove_extension extension_name')
+    @commands.is_owner()
+    async def remove_extension(self, ctx, extension_name):
+        remove_extension_function(extension_feature_path + extension_name)
+
+        await ctx.send('Extension ' + extension_name + ' removed from bot.')
+
+    @remove_extension.error
+    async def remove_extension_error(self, ctx, error):
+        print(error)
+        pass
+
     @commands.command(name='invite', help='Returns a invite link for the bot.')
     async def generate_invite_link(self, ctx):
         await ctx.send(discord.utils.oauth_url(
             client_id=self.bot.user.id,
-            permissions=discord.Permissions(manage_channels=True, manage_roles=True,
-                                            read_messages=True, send_messages=True)))
+            permissions=discord.Permissions(**core.permission_manager.get_permissions())))
 
     @generate_invite_link.error
     async def generate_invite_link_error(self, ctx, error):

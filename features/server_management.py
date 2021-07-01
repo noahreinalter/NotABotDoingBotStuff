@@ -1,18 +1,18 @@
 from discord.ext import commands
 
-from main import add_extension_function, remove_extension_function
 import core.role_manager
 import core.prefix_manager
-
-extension_feature_path = 'features.'
+import core.permission_manager
 
 
 def setup(bot):
+    core.permission_manager.add_permissions(["read_messages", "send_messages"])
     bot.add_cog(ServerManagement(bot))
     print('ServerManagement is being loaded!')
 
 
 def teardown(bot):
+    core.permission_manager.remove_permissions(["read_messages", "send_messages"])
     bot.remove_cog('ServerManagement')
     print('ServerManagement is being unloaded')
 
@@ -20,28 +20,6 @@ def teardown(bot):
 class ServerManagement(commands.Cog, name='Server Management'):
     def __init__(self, bot):
         self.bot = bot
-
-    @commands.command(name='add_extension', help='$add_extension extension_name')
-    @commands.is_owner()
-    async def add_extension(self, ctx, extension_name):
-        add_extension_function(extension_feature_path + extension_name)
-
-        await ctx.send('Extension ' + extension_name + ' added to bot.')
-
-    @add_extension.error
-    async def add_extension_error(self, ctx, error):
-        pass
-
-    @commands.command(name='remove_extension', help='$remove_extension extension_name')
-    @commands.is_owner()
-    async def remove_extension(self, ctx, extension_name):
-        remove_extension_function(extension_feature_path + extension_name)
-
-        await ctx.send('Extension ' + extension_name + ' removed from bot.')
-
-    @remove_extension.error
-    async def remove_extension_error(self, ctx, error):
-        pass
 
     @commands.command(name='change_prefix', help='$change_prefix new prefix')
     @core.role_manager.admin_role_check()
@@ -91,7 +69,7 @@ class ServerManagement(commands.Cog, name='Server Management'):
         await ctx.send('Admin role changed to ' + new_role_name)
 
     @change_admin_role.error
-    async def change_admin_role(self, ctx, error):
+    async def change_admin_role_error(self, ctx, error):
         if isinstance(error, commands.NoPrivateMessage):
             await ctx.send('This command only works on a server.')
         elif isinstance(error, commands.CheckFailure):
