@@ -44,6 +44,10 @@ def remove_extension_function(extension_name, bot_parameter):
     bot_parameter.unload_extension(extension_name)
 
 
+def reload_extension_function(extension_name, bot_parameter):
+    bot_parameter.reload_extension(extension_name)
+
+
 def create_connection(path):
     connection = None
     try:

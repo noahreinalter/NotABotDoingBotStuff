@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from main import add_extension_function, remove_extension_function
+from main import add_extension_function, remove_extension_function, reload_extension_function
 import core.permission_manager
 
 extension_feature_path = 'features.'
@@ -27,7 +27,6 @@ class BotManagement(commands.Cog, name='Bot Management'):
     @commands.is_owner()
     async def add_extension(self, ctx, extension_name):
         add_extension_function(extension_feature_path + extension_name, self.bot)
-
         await ctx.send('Extension ' + extension_name + ' added to bot.')
 
     @add_extension.error
@@ -38,12 +37,20 @@ class BotManagement(commands.Cog, name='Bot Management'):
     @commands.is_owner()
     async def remove_extension(self, ctx, extension_name):
         remove_extension_function(extension_feature_path + extension_name, self.bot)
-
         await ctx.send('Extension ' + extension_name + ' removed from bot.')
 
     @remove_extension.error
     async def remove_extension_error(self, ctx, error):
-        print(error)
+        pass
+
+    @commands.command(name='reload_extension', help='$reload_extension extension_name')
+    @commands.is_owner()
+    async def reload_extension(self, ctx, extension_name):
+        reload_extension_function(extension_feature_path + extension_name, self.bot)
+        await ctx.send('Extension ' + extension_name + ' reloaded.')
+
+    @reload_extension.error
+    async def reload_extension_error(self, ctx, error):
         pass
 
     @commands.command(name='invite', help='Returns a invite link for the bot.')
