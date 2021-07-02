@@ -26,7 +26,7 @@ class BotManagement(commands.Cog, name='Bot Management'):
     @commands.command(name='add_extension', help='$add_extension extension_name')
     @commands.is_owner()
     async def add_extension(self, ctx, extension_name):
-        add_extension_function(extension_feature_path + extension_name)
+        add_extension_function(extension_feature_path + extension_name, self.bot)
 
         await ctx.send('Extension ' + extension_name + ' added to bot.')
 
@@ -37,7 +37,7 @@ class BotManagement(commands.Cog, name='Bot Management'):
     @commands.command(name='remove_extension', help='$remove_extension extension_name')
     @commands.is_owner()
     async def remove_extension(self, ctx, extension_name):
-        remove_extension_function(extension_feature_path + extension_name)
+        remove_extension_function(extension_feature_path + extension_name, self.bot)
 
         await ctx.send('Extension ' + extension_name + ' removed from bot.')
 

@@ -30,23 +30,18 @@ async def on_ready():
     for guild in bot.guilds:
         print(' {0}, Number of members = {1}'.format(guild.name, guild.member_count))
 
-    features = glob.glob('features/*.py')
-    for feature in features:
-        feature = feature.replace('.py', '')
-        add_extension_function(feature.replace('\\', '.'))
-
 
 @bot.event
 async def on_guild_join(guild):
     print('Joined', guild)
 
 
-def add_extension_function(extension_name):
-    bot.load_extension(extension_name)
+def add_extension_function(extension_name, bot_parameter):
+    bot_parameter.load_extension(extension_name)
 
 
-def remove_extension_function(extension_name):
-    bot.unload_extension(extension_name)
+def remove_extension_function(extension_name, bot_parameter):
+    bot_parameter.unload_extension(extension_name)
 
 
 def create_connection(path):
@@ -84,4 +79,11 @@ if __name__ == '__main__':
     core.globals.initialize()
     core.globals.sql_connection = create_connection(sql_path)
     create_servers(core.globals.sql_connection)
+
+    features = glob.glob('features/*.py')
+    for feature in features:
+        feature = feature.replace('.py', '')
+        feature = feature.replace('\\', '.')
+        add_extension_function(feature, bot)
+
     bot.run(BOT_TOKEN)
