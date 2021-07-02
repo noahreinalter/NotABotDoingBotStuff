@@ -1,4 +1,5 @@
 from discord.ext import commands
+import discord
 import logging
 import os
 from dotenv import load_dotenv
@@ -8,6 +9,7 @@ import glob
 
 import core.globals
 import core.prefix_manager
+import core.permission_manager
 
 load_dotenv()
 
@@ -29,6 +31,11 @@ async def on_ready():
     print('Logged in on {0} servers'.format(len(bot.guilds)))
     for guild in bot.guilds:
         print(' {0}, Number of members = {1}'.format(guild.name, guild.member_count))
+
+    print('You can invite the bot using this link:',
+          discord.utils.oauth_url(
+              client_id=bot.user.id,
+              permissions=discord.Permissions(**core.permission_manager.get_permissions())))
 
 
 @bot.event

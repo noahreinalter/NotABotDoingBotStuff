@@ -3,16 +3,20 @@ from discord.ext import commands
 import core.role_manager
 import core.prefix_manager
 import core.permission_manager
+import core.permission_enum
+
+permissions = [core.permission_enum.PermissionEnum.read_messages.name,
+               core.permission_enum.PermissionEnum.send_messages.name]
 
 
 def setup(bot):
-    core.permission_manager.add_permissions(["read_messages", "send_messages"])
+    core.permission_manager.add_permissions(permissions)
     bot.add_cog(ServerManagement(bot))
     print('ServerManagement is being loaded!')
 
 
 def teardown(bot):
-    core.permission_manager.remove_permissions(["read_messages", "send_messages"])
+    core.permission_manager.remove_permissions(permissions)
     bot.remove_cog('ServerManagement')
     print('ServerManagement is being unloaded')
 
