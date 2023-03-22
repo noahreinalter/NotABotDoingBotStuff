@@ -26,7 +26,8 @@ import core.permission_manager
 import core.permission_enum
 
 permissions = [core.permission_enum.PermissionEnum.read_messages.name,
-               core.permission_enum.PermissionEnum.send_messages.name]
+               core.permission_enum.PermissionEnum.send_messages.name,
+               core.permission_enum.PermissionEnum.use_application_commands.name]
 
 tl = Timeloop()
 
@@ -140,7 +141,7 @@ class Covid19(commands.Cog, name='Covid-19'):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='covid19_decoder', help='Attach picture of 3G-QR-Code in png or jpg format.')
+    @commands.slash_command(name='covid19_decoder', description='Attach picture of 3G-QR-Code in png or jpg format.')
     async def covid19_decoder(self, ctx):
         json_data = qr_code_url_to_json(ctx.message.attachments[0].url)
 
@@ -152,7 +153,7 @@ class Covid19(commands.Cog, name='Covid-19'):
     async def covid19_decoder_error(self, ctx, error):
         await ctx.send('The attached document needs to be a png or jpg and there must be 3G-QR-Code in the picture')
 
-    @commands.command(name='covid19_entry_test', help='Attach picture of 3G-QR-Code in png or jpg format.')
+    @commands.slash_command(name='covid19_entry_test', description='Attach picture of 3G-QR-Code in png or jpg format.')
     async def covid19_entry_test(self, ctx):
         json_data = qr_code_url_to_json(ctx.message.attachments[0].url)
 

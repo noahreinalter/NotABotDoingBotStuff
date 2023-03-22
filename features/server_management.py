@@ -6,7 +6,8 @@ import core.permission_manager
 import core.permission_enum
 
 permissions = [core.permission_enum.PermissionEnum.read_messages.name,
-               core.permission_enum.PermissionEnum.send_messages.name]
+               core.permission_enum.PermissionEnum.send_messages.name,
+               core.permission_enum.PermissionEnum.use_application_commands.name]
 
 
 def setup(bot):
@@ -25,7 +26,7 @@ class ServerManagement(commands.Cog, name='Server Management'):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='change_prefix', help='$change_prefix new prefix')
+    @commands.slash_command(name='change_prefix', description='$change_prefix new prefix')
     @core.role_manager.admin_role_check()
     @commands.guild_only()
     async def change_prefix(self, ctx, new_prefix):
@@ -53,7 +54,7 @@ class ServerManagement(commands.Cog, name='Server Management'):
         else:
             await ctx.send('Something went wrong please try again.')
 
-    @commands.command(name='change_admin_role', help='$change_admin_role @New_Admin_Role')
+    @commands.slash_command(name='change_admin_role', description='$change_admin_role @New_Admin_Role')
     @core.role_manager.admin_role_check()
     @commands.guild_only()
     async def change_admin_role(self, ctx, new_role_name):

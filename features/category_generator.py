@@ -13,7 +13,8 @@ member_string = ' Member'
 permissions = [core.permission_enum.PermissionEnum.manage_channels.name,
                core.permission_enum.PermissionEnum.manage_roles.name,
                core.permission_enum.PermissionEnum.read_messages.name,
-               core.permission_enum.PermissionEnum.send_messages.name]
+               core.permission_enum.PermissionEnum.send_messages.name,
+               core.permission_enum.PermissionEnum.use_application_commands.name]
 
 
 def setup(bot):
@@ -32,7 +33,7 @@ class CategoryGenerator(commands.Cog, name='Category Generator'):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='generate', help='$generate categoryname @User')
+    @commands.slash_command(name='generate', description='$generate categoryname @User')
     @core.role_manager.admin_role_check()
     @commands.bot_has_guild_permissions(manage_channels=True, manage_roles=True,
                                         read_messages=True, send_messages=True)
@@ -91,7 +92,7 @@ class CategoryGenerator(commands.Cog, name='Category Generator'):
             guild.create_voice_channel(name=channel_name + '-voice', category=category, sync_permissions=True)
         )
 
-    @commands.command(name='delete', help='$delete categoryname')
+    @commands.slash_command(name='delete', description='$delete categoryname')
     @core.role_manager.admin_role_check()
     @commands.bot_has_guild_permissions(manage_channels=True, manage_roles=True,
                                         read_messages=True, send_messages=True)
@@ -129,7 +130,7 @@ class CategoryGenerator(commands.Cog, name='Category Generator'):
         )
         await category_channel.delete()
 
-    @commands.command(name='add', help='$add @User @Role')
+    @commands.slash_command(name='add', description='$add @User @Role')
     @commands.bot_has_guild_permissions(manage_channels=True, manage_roles=True,
                                         read_messages=True, send_messages=True)
     @commands.guild_only()
@@ -153,7 +154,7 @@ class CategoryGenerator(commands.Cog, name='Category Generator'):
         else:
             await ctx.send('Something went wrong please try again.')
 
-    @commands.command(name='remove', help='$remove @User @Role')
+    @commands.slash_command(name='remove', description='$remove @User @Role')
     @commands.bot_has_guild_permissions(manage_channels=True, manage_roles=True,
                                         read_messages=True, send_messages=True)
     @commands.guild_only()

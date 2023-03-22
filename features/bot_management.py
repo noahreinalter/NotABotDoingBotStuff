@@ -7,8 +7,8 @@ import core.permission_enum
 
 extension_feature_path = 'features.'
 permissions = [core.permission_enum.PermissionEnum.read_messages.name,
-               core.permission_enum.PermissionEnum.send_messages.name]
-
+               core.permission_enum.PermissionEnum.send_messages.name,
+               core.permission_enum.PermissionEnum.use_application_commands.name]
 
 def setup(bot):
     core.permission_manager.add_permissions(permissions)
@@ -26,7 +26,7 @@ class BotManagement(commands.Cog, name='Bot Management'):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='add_extension', help='$add_extension extension_name')
+    @commands.slash_command(name='add_extension', description='$add_extension extension_name')
     @commands.is_owner()
     async def add_extension(self, ctx, extension_name):
         add_extension_function(extension_feature_path + extension_name, self.bot)
@@ -36,7 +36,7 @@ class BotManagement(commands.Cog, name='Bot Management'):
     async def add_extension_error(self, ctx, error):
         pass
 
-    @commands.command(name='remove_extension', help='$remove_extension extension_name')
+    @commands.slash_command(name='remove_extension', description='$remove_extension extension_name')
     @commands.is_owner()
     async def remove_extension(self, ctx, extension_name):
         remove_extension_function(extension_feature_path + extension_name, self.bot)
@@ -46,7 +46,7 @@ class BotManagement(commands.Cog, name='Bot Management'):
     async def remove_extension_error(self, ctx, error):
         pass
 
-    @commands.command(name='reload_extension', help='$reload_extension extension_name')
+    @commands.slash_command(name='reload_extension', description='$reload_extension extension_name')
     @commands.is_owner()
     async def reload_extension(self, ctx, extension_name):
         reload_extension_function(extension_feature_path + extension_name, self.bot)
@@ -56,7 +56,7 @@ class BotManagement(commands.Cog, name='Bot Management'):
     async def reload_extension_error(self, ctx, error):
         pass
 
-    @commands.command(name='invite', help='Returns a invite link for the bot.')
+    @commands.slash_command(name='invite', description='Returns a invite link for the bot.')
     async def generate_invite_link(self, ctx):
         await ctx.send(discord.utils.oauth_url(
             client_id=self.bot.user.id,
@@ -66,7 +66,7 @@ class BotManagement(commands.Cog, name='Bot Management'):
     async def generate_invite_link_error(self, ctx, error):
         pass
 
-    @commands.command(name='stop', help='Stops the bot.')
+    @commands.slash_command(name='stop', description='Stops the bot.')
     @commands.is_owner()
     async def stop_bot(self, ctx):
         await self.bot.close()
